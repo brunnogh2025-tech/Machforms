@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MachForms — Cadastro de acampamentos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green: #1B5E3F;
+    --green-dark: #123F2A;
+    --green-light: #B9D9C4;
+    --paper: #FFFFFF;
+    --text: #1B1B18;
+    --muted: #6E6E68;
+    --line: #E4E4DE;
+    --danger: #B0402E;
+    --page-bg: #EAEAE4;
+    --field-bg: #FAFAF7;
+    --soft-bg: #F5F5F1;
+    --chat-bg: #FFFFF0;
+    --chat-bot: #EFEFDF;
+    --chat-input: #CDCDCD;
+    --contrast: #2A2A27;
+  }
+  :root[data-theme='dark']{
+    color-scheme: dark;
+    --green: #1B5E3F;
+    --green-dark: #123F2A;
+    --green-light: #D7E8DC;
+    --paper: #202622;
+    --text: #F0F3EF;
+    --muted: #B5BDB6;
+    --line: #3D4941;
+    --danger: #FF9384;
+    --page-bg: #111612;
+    --field-bg: #29312B;
+    --soft-bg: #303832;
+    --chat-bg: #202820;
+    --chat-bot: #303A31;
+    --chat-input: #29312B;
+    --contrast: #E8EEE9;
+  }
+  :root{ color-scheme: light; }
+  :root[data-theme='dark']{ color-scheme: dark; }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; min-height:100%; background:var(--page-bg); transition:background-color .2s ease,color .2s ease; }
+  body{
+    font-family:'Poppins', sans-serif;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding: 32px 16px;
+  }
+  .phone{
+    width: 100%;
+    max-width: 390px;
+    background: var(--paper);
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    min-height: 780px;
+    position:relative;
+    color:var(--text);
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{
+    background: var(--green);
+    padding: 18px 20px 20px;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+  .topbar .back{
+    color:#fff;
+    font-size: 20px;
+    cursor:pointer;
+    width: 20px;
+    text-align:center;
+    line-height:1;
+  }
+  .topbar .icon{
+    width: 30px;
+    height: 30px;
+    flex-shrink:0;
+    border-radius: 6px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+  .topbar .theme-btn{ width:34px; height:34px; flex-shrink:0; border:1px solid rgba(255,255,255,.45); border-radius:8px; background:transparent; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:17px; margin-left:auto; }
+  .topbar .theme-btn:hover{ background:rgba(255,255,255,.12); }
+  .theme-chat-btn{ display:none; position:absolute; z-index:10; top:12px; right:12px; width:38px; height:38px; border:1px solid var(--line); border-radius:10px; background:var(--paper); color:var(--text); cursor:pointer; align-items:center; justify-content:center; font-size:18px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  .phone.chat-mode .theme-chat-btn{ display:flex; }
+  .topbar .search-btn{ margin-left:0; width:34px; height:34px; border:1px solid rgba(255,255,255,.45); border-radius:8px; background:transparent; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .topbar .search-btn:hover{ background:rgba(255,255,255,.12); }
+  .search-controls{ display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+  .search-controls input,.search-controls select{ width:100%; min-width:0; height:40px; border-radius:7px; border:1px solid var(--line); background:var(--field-bg); padding:0 11px; font:13px 'Poppins',sans-serif; color:var(--text); }
+  .event-result{ display:flex; gap:11px; padding:12px; margin-bottom:10px; border:1px solid var(--green); border-radius:11px; background:var(--green); color:#fff; cursor:pointer; transition:background-color .22s ease,color .22s ease,border-color .22s ease,transform .22s ease; }
+  .event-result:hover,.event-result:focus-visible{ background:#fff; color:var(--green); border-color:var(--green); transform:translateY(-2px); outline:none; }
+  .event-result img,.event-placeholder{ width:82px; height:82px; flex-shrink:0; border-radius:9px; object-fit:cover; background:var(--paper); }
+  .event-placeholder{ display:flex; align-items:center; justify-content:center; color:var(--green); font-size:11px; text-align:center; padding:5px; }
+  .event-info{ min-width:0; }
+  .event-info .n{ font-size:13.5px; font-weight:600; overflow-wrap:anywhere; color:inherit; }
+  .event-info .d{ font-size:11.5px; color:inherit; opacity:.88; margin-top:4px; overflow-wrap:anywhere; }
+  .pagination{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:14px; }
+  .pagination button{ border:1px solid var(--line); border-radius:7px; padding:7px 10px; background:var(--paper); color:var(--text); cursor:pointer; font:12px 'Poppins',sans-serif; }
+  .pagination button:disabled{ opacity:.4; cursor:default; }
+  .topbar .brand{
+    color:#fff;
+    font-weight:600;
+    font-size: 17px;
+    letter-spacing: 0.2px;
+  }
+  .content{
+    flex:1;
+    padding: 26px 22px 22px;
+    display:flex;
+    flex-direction:column;
+  }
+  .hero-card{
+    width:100%;
+    background: var(--green-light);
+    border-radius: 14px;
+    min-height: 200px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 28px 20px;
+    margin-bottom: 26px;
+  }
+  .hero-card p{
+    margin:0;
+    color: var(--green-dark);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  h3.title{
+    margin: 0 0 4px;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  p.subtitle{
+    margin: 0 0 18px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .field{ margin-bottom: 14px; }
+  .field label{
+    display:block;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .field input, .field select{
+    width:100%;
+    height: 38px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--field-bg);
+    padding: 0 11px;
+    font-family:'Poppins', sans-serif;
+    font-size: 13.5px;
+    color: var(--text);
+  }
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color: var(--green);
+  }
+  .checks{ margin-bottom: 14px; }
+  .check-label{ font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+  .check-item{
+    display:flex;
+    align-items:center;
+    gap: 9px;
+    margin-bottom: 9px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .check-box{
+    width: 17px;
+    height: 17px;
+    border-radius: 4px;
+    border: 1.5px solid var(--line);
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .check-item.on .check-box{ background: var(--green); border-color: var(--green); }
+  .check-item.on .check-box::after{ content:''; width:5px; height:9px; border:solid #fff; border-width:0 2px 2px 0; transform: rotate(45deg) translate(-1px,-1px); }
+  .check-item span.label{ font-size: 13.5px; color: var(--text); }
+  .err{ font-size: 11.5px; color: var(--danger); min-height: 14px; margin-top: -8px; margin-bottom: 6px; }
+  .actions{
+    width:100%;
+    display:flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 18px;
+  }
+  .btn{
+    flex:1;
+    padding: 12px 0;
+    border-radius: 8px;
+    border: none;
+    font-family:'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    cursor:pointer;
+    text-align:center;
+  }
+  .btn-primary{ background: var(--green); color: #fff; }
+  .btn-primary:hover{ background: var(--green-dark); }
+  .btn-secondary{ background: var(--paper); color: var(--text); border: 1px solid var(--line); }
+  .btn-secondary:hover{ background: var(--soft-bg); }
+  .list-item{
+    border-bottom: 1px solid var(--line);
+    padding: 12px 0;
+  }
+  .list-item .n{ font-size: 14px; color: var(--text); font-weight:500; }
+  .list-item .d{ font-size: 12px; color: var(--muted); margin-top:2px; }
+  .empty{ color: var(--muted); font-size: 13.5px; text-align:center; padding: 30px 0; }
+  .confirm-icon{
+    width:56px; height:56px; border-radius:50%;
+    background: var(--green-light);
+    display:flex; align-items:center; justify-content:center;
+    margin: 10px auto 18px;
+  }
+  .phone.chat-mode{ background:var(--chat-bg); }
+.phone.chat-mode .content{ padding:18px 16px 16px; }
+.chat{ flex:1; display:flex; flex-direction:column; }
+.chat-back{ font-size:22px; cursor:pointer; width:28px; line-height:1; color:var(--text); }
+.chat-msgs{ flex:1; min-height:0; overflow-y:auto; padding:16px 0; display:flex; flex-direction:column; gap:8px; }.msg{ max-width:80%; padding:9px 13px; border-radius:14px; font-size:13.5px; line-height:1.4; }
+.msg.user{ align-self:flex-end; background:var(--contrast); color:#202622; }
+.msg.bot{ align-self:flex-start; background:var(--chat-bot); color:var(--text); }
+.chat-box{ display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:10px; }
+.chat-box input{ flex:1; height:40px; border-radius:20px; border:1px solid var(--line); background:var(--chat-input); padding:0 16px; font-family:'Poppins',sans-serif; font-size:13.5px; color:var(--text); outline:none; }.chat-box input::placeholder{ color:var(--muted); opacity:1; }
+.chat-box input:focus{ border-color:var(--green); }
+.chat-tools{ display:flex; align-items:center; gap:14px; }
+.chat-send{ width:40px; height:40px; flex-shrink:0; border-radius:50%; border:none; background:var(--green); color:#fff; font-size:16px; cursor:pointer; }
+.chat-send:hover{ background:var(--green-dark); }
+  /* Mantém os controles no visual original, mesmo quando o fundo da página está escuro */
+  .field input,.field select,.search-controls input,.search-controls select,.chat-box input{ background:#FAFAF7; color:#1B1B18; border-color:#D7D7D0; color-scheme:light; }
+  .field input::placeholder,.search-controls input::placeholder,.chat-box input::placeholder{ color:#77776F; opacity:1; }
+  .btn-secondary{ background:#F5F5F1; color:#1B1B18; border:1px solid #D7D7D0; }
+  .btn-secondary:hover{ background:#EAEAE4; }
+  .hero-card{ background:var(--green-light); }
+  .hero-card p{ color:var(--green-dark); }
+  .msg.user{ background:var(--green); color:#FFFFFF; }
+  .msg.bot{ background:var(--chat-bot); color:var(--text); }
+  button:focus-visible,input:focus-visible,select:focus-visible{ outline:2px solid #78B99A; outline-offset:2px; }
+  :root[data-theme='dark'] .event-result:hover,:root[data-theme='dark'] .event-result:focus-visible{ background:#F4F7F4; color:#123F2A; }
+  :root[data-theme='dark'] .event-placeholder{ background:var(--paper); color:var(--green-dark); }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="topbar">
+    <span class="back" id="backBtn" style="display:none;">&#8592;</span>
+    <img class="icon" src="img/machforms-logo.webp" alt="Logo MachForms">
+    <span class="brand">MachForms</span>
+    <button class="theme-btn" id="themeBtn" aria-label="Alternar tema" title="Alternar tema" onclick="toggleTheme()">☾</button>
+    <button class="search-btn" id="searchBtn" aria-label="Buscar eventos" title="Buscar eventos" onclick="go('busca')">⌕</button>
+  </div>
+  <button class="theme-chat-btn" id="themeChatBtn" aria-label="Alternar tema" title="Alternar tema" onclick="toggleTheme()">☾</button>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+const API_URL = 'http://localhost:3000/api'; // Defina a URL base do seu futuro backend aqui
+
+const state = {
+  screen: 'home',
+  history: [],
+  chat: [],
+  evento: {},
+  eventoInscricao: null,
+  participante: { dias: [], dormida: '', restricoes: [] },
+  busca: { termo: '', ordenacao: 'recentes', pagina: 1, porPagina: 5, eventos: [], localizacao: null },
+  authToken: null
+};
+
+function applyTheme(theme){
+  const selected = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', selected);
+  const symbol = selected === 'dark' ? '☀' : '☾';
+  const label = selected === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro';
+  ['themeBtn','themeChatBtn'].forEach(id => {
+    const button = document.getElementById(id);
+    if(button){ button.textContent = symbol; button.setAttribute('aria-label', label); button.title = label; }
+  });
+}
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try{ localStorage.setItem('machforms-theme', next); }catch(e){}
+}
+function go(screen, pushHistory){
+  if(pushHistory !== false) state.history.push(state.screen);
+  state.screen = screen;
+  render();
+}
+function goBack(){
+  const prev = state.history.pop();
+  if(prev){ state.screen = prev; render(); }
+}
+
+function field(id, label, ph, type){
+  return `<div class="field"><label for="${id}">${label}</label><input type="${type||'text'}" id="${id}" placeholder="${ph||''}"></div>`;
+}
+
+function checkGroup(groupId, label, options, selectedArr){
+  let html = `<div class="checks">`;
+  if(label) html += `<div class="check-label">${label}</div>`;
+  options.forEach(opt => {
+    const on = selectedArr.includes(opt);
+    html += `<div class="check-item ${on?'on':''}" onclick="toggleCheck('${groupId}','${opt}')"><div class="check-box"></div><span class="label">${opt}</span></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function baseToggleCheck(groupId, opt){
+  const arr = groupId === 'dias' ? state.participante.dias : state.participante.restricoes;
+  const i = arr.indexOf(opt);
+  if(i === -1) arr.push(opt); else arr.splice(i,1);
+  render();
+}
+function toggleCheck(groupId, opt){
+  if(groupId === 'dormida'){
+    state.participante.dormida = state.participante.dormida === opt ? '' : opt;
+    render();
+    return;
+  }
+  baseToggleCheck(groupId, opt);
+}
+
+function errBox(id){ return `<div class="err" id="err-${id}"></div>`; }
+function showErr(id, msg){ const el = document.getElementById('err-'+id); if(el) el.textContent = msg; }
+function clearErrs(ids){ ids.forEach(id => showErr(id, '')); }
+
+const screens = {
+
+home: () => `
+  <div class="hero-card"><p>MachForms &mdash;<br>cadastro de<br>acampamentos</p></div>
+  <div class="actions" style="margin-top:0; flex-direction:column;">
+    <button class="btn btn-primary" onclick="go('evento')">Adiminstração</button>
+    <button class="btn btn-secondary" onclick="go('login')">Login</button>
+  </div>`,
+
+login: () => `
+  <h3 class="title">Login</h3>
+  <p class="subtitle">Entre para acompanhar as inscrições do seu evento.</p>
+  ${field('loginEmail','E-mail','nome@email.com','email')}${errBox('loginEmail')}
+  ${field('loginSenha','Senha','••••••••','password')}${errBox('loginSenha')}
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="go('home')">Voltar</button>
+    <button class="btn btn-primary" onclick="submitLogin()">Login</button>
+  </div>`,
+
+evento: () => `
+  <h3 class="title">Cadastro do evento</h3>
+  <p class="subtitle">Dados de quem está criando o formulário.</p>
+  ${field('evNomeCriador','Nome de criador do formulário','Ana Souza')}${errBox('evNomeCriador')}
+  ${field('evDataNasc','Data de nascimento','dd/mm/aaaa')}${errBox('evDataNasc')}
+  ${field('evNomeEvento','Nome do evento','Trilha Verde 2027')}${errBox('evNomeEvento')}
+  ${field('evImagem','URL da imagem do evento','https://...','url')}
+  ${field('evDataInicio','Data de início','', 'datetime-local')}${errBox('evDataInicio')}
+  ${field('evLocalizacao','Localização do evento','Cidade, estado ou endereço')}${errBox('evLocalizacao')}
+  ${field('evLatitude','Latitude (opcional)','Ex.: -23.5505','number')}
+  ${field('evLongitude','Longitude (opcional)','Ex.: -46.6333','number')}
+  ${field('evTelefone','Número de telefone','(11) 91234-5678','tel')}${errBox('evTelefone')}
+  ${field('evSenha','Criar senha','Mínimo de 6 caracteres','password')}${errBox('evSenha')}
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="go('home')">Voltar</button>
+    <button class="btn btn-primary" onclick="submitEvento()">Salvar</button>
+  </div>`,
+
+cadastro: () => `
+  <h3 class="title">Inscrição no evento</h3>
+  ${state.eventoInscricao ? `<p class="subtitle">Evento: ${escapeHtml(state.eventoInscricao.nomeEvento || '')}</p>` : '<p class="subtitle">Preencha seus dados para continuar.</p>'}
+  ${field('paNome','Nome','Ana Beatriz Souza')}${errBox('paNome')}
+  ${field('paEmail','E-mail','ana@email.com','email')}${errBox('paEmail')}
+  ${checkGroup('dias','Dias em que vai participar', ['Dia 1','Dia 2','Dia 3'], state.participante.dias)}
+  ${errBox('dias')}
+  ${field('paTelefone','Número de telefone','(11) 91234-5678','tel')}${errBox('paTelefone')}
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="go(state.eventoInscricao ? 'busca' : 'home')">Voltar</button>
+    <button class="btn btn-primary" onclick="submitParticipante()">Continuar</button>
+  </div>`,
+
+dormida: () => `
+  <h3 class="title">Continuação</h3>
+  <p class="subtitle">Local para dormir</p>
+  ${checkGroup('dormida', null, ['Barraca','Chalé'], state.participante.dormida ? [state.participante.dormida] : [])}
+  ${errBox('dormida')}
+  ${state.participante.dormida === 'Chalé' ? field('paResponsavel','Nome do responsável pelo chalé','') : ''}
+  ${errBox('paResponsavel')}
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="go('participante')">Voltar</button>
+    <button class="btn btn-primary" onclick="submitDormida()">Continuar</button>
+  </div>`,
+
+restricao: () => `
+  <h3 class="title">Continuação</h3>
+  <p class="subtitle">Data de nascimento e restrição alimentar</p>
+  ${field('paDataNasc','Data de nascimento','dd/mm/aaaa')}${errBox('paDataNasc')}
+  ${checkGroup('restricoes','Restrição alimentar', ['Vegetariano','Alérgico a amendoim','Vegano','Outro'], state.participante.restricoes)}
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="go('dormida')">Voltar</button>
+    <button class="btn btn-primary" onclick="submitRestricao()">Cadastrar</button>
+  </div>`,
+
+confirmacao: () => `
+  <div class="confirm-icon">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 12L10 18L20 6" stroke="#123F2A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <h3 class="title" style="text-align:center;">Inscrição confirmada</h3>
+  <p class="subtitle" style="text-align:center;">Protocolo <strong style="color:var(--text);">${state.protocolo || ''}</strong></p>
+  <p class="subtitle" style="text-align:center; font-size:12px;">Uma senha de acesso ao chat foi enviada para o e-mail dos responsáveis cadastrados.</p>
+  <div class="actions" style="margin-top:0; flex-direction:column;">
+    <button class="btn btn-primary" onclick="resetParticipante(); go('cadastro', false)">Cadastrar outro participante</button>
+    <button class="btn btn-secondary" onclick="resetAll(); go('home', false)">Voltar ao início</button>
+  </div>`,
+
+busca: () => `
+  <h3 class="title">Buscar eventos</h3>
+  <p class="subtitle">Encontre acampamentos e eventos cadastrados.</p>
+  <div class="search-controls">
+    <input id="buscaTermo" type="search" placeholder="Digite o nome do evento" value="${escapeHtml(state.busca.termo)}" onkeydown="if(event.key==='Enter'){state.busca.termo=this.value.trim();state.busca.pagina=1;renderResultadosBusca();}">
+    <select id="buscaOrdenacao" onchange="state.busca.ordenacao=this.value;state.busca.pagina=1;if(this.value==='proximos'&&!state.busca.localizacao){obterLocalizacao();}else{loadEventosBusca();}">
+      <option value="alfabetica" ${state.busca.ordenacao==='alfabetica'?'selected':''}>Ordem alfabética</option>
+      <option value="recentes" ${state.busca.ordenacao==='recentes'?'selected':''}>Mais recentes</option>
+      <option value="proximos" ${state.busca.ordenacao==='proximos'?'selected':''}>Mais próximos</option>
+    </select>
+  </div>
+  <div id="buscaResultados"><p class="empty">Carregando eventos...</p></div>
+  <div class="actions" style="margin-top:18px;">
+    <button class="btn btn-secondary" onclick="goBack()">Voltar</button>
+  </div>`,
+
+painel: () => `
+  <h3 class="title">Participantes inscritos</h3>
+  <p class="subtitle">Evento: ${state.evento.nomeEvento || 'sem evento cadastrado'}</p>
+  <div id="painelLista"><p class="empty">Carregando...</p></div>
+  <div class="actions" style="margin-top:18px;">
+    <button class="btn btn-secondary" onclick="go('home')">Sair</button>
+  </div>`,
+
+  chat: () => `
+  <div class="chat">
+    <div class="chat-back" onclick="logout()">&#8592;</div>
+    <div class="chat-msgs" id="chatMsgs">
+      ${state.chat.map(m => `<div class="msg ${m.from}">${escapeHtml(m.text)}</div>`).join('')}
+    </div>
+    <div class="chat-box">
+      <input id="chatInput" placeholder="Digite sua mensagem" onkeydown="if(event.key==='Enter') sendChat()">
+      <button class="chat-send" onclick="sendChat()">&#8593;</button>
+    </div>
+    </div>
+  </div>`
+};
+
+
+function render(){
+  const isChat = state.screen === 'chat';
+  document.querySelector('.phone').classList.toggle('chat-mode', isChat);
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+  document.querySelector('.topbar').style.display = isChat ? 'none' : 'flex';
+  document.getElementById('content').innerHTML = screens[state.screen]();
+  document.getElementById('backBtn').style.display = state.history.length ? 'block' : 'none';
+  document.getElementById('backBtn').onclick = goBack;
+  const searchBtn = document.getElementById('searchBtn');
+  if(searchBtn) searchBtn.style.display = isChat ? 'none' : 'flex';
+  if(state.screen === 'busca') loadEventosBusca();
+  if(state.screen === 'painel') loadPainel();
+  if(isChat){
+    const box = document.getElementById('chatMsgs');
+    box.scrollTop = box.scrollHeight;
+  }
+}
+
+// ==========================================
+// FUNÇÕES DE REQUISIÇÕES HTTP PARA O BACK-END
+// ==========================================
+
+async function submitLogin(){
+  clearErrs(['loginEmail','loginSenha']);
+  const email = document.getElementById('loginEmail').value.trim();
+  const senha = document.getElementById('loginSenha').value;
+  let ok = true;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showErr('loginEmail','Informe um e-mail válido'); ok=false; }
+  if(senha.length < 4){ showErr('loginSenha','Senha muito curta'); ok=false; }
+  if(!ok) return;
+
+  try {
+    const response = await fetch(`${API_URL}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.message || 'Erro ao realizar login');
+    
+    state.authToken = data.token;
+    state.evento = data.evento || {};
+    go('chat');
+  } catch(e) {
+    showErr('loginSenha', e.message || 'Falha na conexão com o servidor');
+  }
+}
+
+async function submitEvento(){
+  const ids = ['evNomeCriador','evDataNasc','evNomeEvento','evDataInicio','evLocalizacao','evTelefone', 'evSenha'];
+  clearErrs(ids);
+  const v = id => document.getElementById(id).value.trim();
+  let ok = true;
+  if(v('evNomeCriador').length < 3){ showErr('evNomeCriador','Informe o nome completo'); ok=false; }
+  if(v('evDataNasc').length < 6){ showErr('evDataNasc','Informe a data de nascimento'); ok=false; }
+  if(v('evNomeEvento').length < 3){ showErr('evNomeEvento','Informe o nome do evento'); ok=false; }
+  if(!v('evDataInicio')){ showErr('evDataInicio','Informe a data de início'); ok=false; }
+  if(v('evLocalizacao').length < 2){ showErr('evLocalizacao','Informe a localização do evento'); ok=false; }
+  if(v('evTelefone').replace(/\D/g,'').length < 10){ showErr('evTelefone','Informe um telefone válido'); ok=false; }
+  if(v('evSenha').length < 6){ showErr('evSenha','Informe a senha com 6 caracteres'); ok=false; }
+  if(!ok) return;
+
+  const novoEvento = {
+    nomeCriador: v('evNomeCriador'),
+    dataNasc: v('evDataNasc'),
+    nomeEvento: v('evNomeEvento'),
+    imagem: v('evImagem'),
+    dataInicio: v('evDataInicio'),
+    localizacao: v('evLocalizacao'),
+    latitude: v('evLatitude') !== '' ? Number(v('evLatitude')) : null,
+    longitude: v('evLongitude') !== '' ? Number(v('evLongitude')) : null,
+    telefone: v('evTelefone'),
+    senha: v('evSenha'),
+    criadoEm: new Date().toISOString()
+  };
+
+  try {
+    const response = await fetch(`${API_URL}/eventos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(novoEvento)
+    });
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.message || 'Erro ao cadastrar evento');
+
+    state.evento = data;
+    state.history = [];
+    state.screen = 'home';
+    render();
+  } catch(e) {
+    showErr('evSenha', e.message || 'Erro ao salvar evento no servidor');
+  }
+}
+
+function submitParticipante(){
+  const ids = ['paNome','paEmail','paTelefone'];
+  clearErrs(ids.concat(['dias']));
+  const v = id => document.getElementById(id).value.trim();
+  let ok = true;
+  if(v('paNome').length < 3){ showErr('paNome','Informe o nome completo'); ok=false; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('paEmail'))){ showErr('paEmail','Informe um e-mail válido'); ok=false; }
+  if(state.participante.dias.length === 0){ showErr('dias','Selecione ao menos um dia'); ok=false; }
+  if(v('paTelefone').replace(/\D/g,'').length < 10){ showErr('paTelefone','Informe um telefone válido'); ok=false; }
+  if(!ok) return;
+  state.participante.nome = v('paNome');
+  state.participante.email = v('paEmail');
+  state.participante.telefone = v('paTelefone');
+  go('dormida');
+}
+
+function submitDormida(){
+  clearErrs(['dormida','paResponsavel']);
+  let ok = true;
+  if(!state.participante.dormida){ showErr('dormida','Escolha uma opção'); ok=false; }
+  if(state.participante.dormida === 'Chalé'){
+    const el = document.getElementById('paResponsavel');
+    const val = el ? el.value.trim() : '';
+    if(val.length < 3){ showErr('paResponsavel','Informe o nome do responsável'); ok=false; }
+    else state.participante.responsavelChale = val;
+  }
+  if(!ok) return;
+  go('restricao');
+}
+
+async function submitRestricao(){
+  clearErrs(['paDataNasc']);
+  const v = id => document.getElementById(id).value.trim();
+  if(v('paDataNasc').length < 6){ showErr('paDataNasc','Informe a data de nascimento'); return; }
+  state.participante.dataNasc = v('paDataNasc');
+
+  const registro = Object.assign({ 
+    eventoId: state.eventoInscricao ? state.eventoInscricao.id : null,
+    evento: (state.eventoInscricao && state.eventoInscricao.nomeEvento) || state.evento.nomeEvento || '' 
+  }, state.participante);
+
+  try{
+    const response = await fetch(`${API_URL}/inscricoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(registro)
+    });
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.message || 'Erro ao realizar inscrição');
+
+    state.protocolo = data.protocolo || ('MF' + Date.now().toString().slice(-6));
+    go('confirmacao', false);
+  } catch(e){
+    console.error('Erro na inscrição:', e);
+    // Fallback local se o back-end não estiver rodando durante testes
+    state.protocolo = 'MF' + Date.now().toString().slice(-6);
+    go('confirmacao', false);
+  }
+}
+
+function resetParticipante(){
+  state.participante = { dias: [], dormida: '', restricoes: [] };
+}
+function resetAll(){
+  state.evento = {};
+  resetParticipante();
+  state.history = [];
+}
+
+async function loadEventosBusca(){
+  const el = document.getElementById('buscaResultados');
+  if(!el) return;
+  el.innerHTML = '<p class="empty">Carregando eventos...</p>';
+  try{
+    let url = `${API_URL}/eventos`;
+    const params = [];
+    if(state.busca.localizacao){
+      params.push(`lat=${state.busca.localizacao.latitude}`);
+      params.push(`lon=${state.busca.localizacao.longitude}`);
+    }
+    if(params.length) url += `?${params.join('&')}`;
+
+    const response = await fetch(url);
+    if(!response.ok) throw new Error('Erro ao buscar eventos');
+    const eventos = await response.json();
+    
+    state.busca.eventos = eventos;
+    renderResultadosBusca();
+  }catch(e){
+    console.error('Erro ao consultar eventos:', e);
+    state.busca.eventos = [];
+    if(el) el.innerHTML = '<p class="empty">Não foi possível carregar os eventos do servidor. Verifique a API.</p>';
+  }
+}
+
+function obterLocalizacao(){
+  if(!navigator.geolocation){ renderResultadosBusca('Seu navegador não oferece geolocalização.'); return; }
+  const el = document.getElementById('buscaResultados');
+  if(el) el.innerHTML = '<p class="empty">Obtendo sua localização...</p>';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    state.busca.localizacao = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+    loadEventosBusca();
+  },()=>renderResultadosBusca('Não foi possível obter sua localização. Permita o acesso ou escolha outra ordenação.'),{timeout:8000});
+}
+
+function distanciaKm(lat1, lon1, lat2, lon2){
+  const rad = n => n * Math.PI / 180;
+  const dLat = rad(lat2-lat1), dLon = rad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function renderResultadosBusca(aviso){
+  const el = document.getElementById('buscaResultados');
+  if(!el) return;
+  const termo = state.busca.termo.toLocaleLowerCase('pt-BR');
+  let lista = state.busca.eventos.filter(ev => (ev.nomeEvento||'').toLocaleLowerCase('pt-BR').includes(termo));
+  
+  if(state.busca.ordenacao === 'alfabetica') lista.sort((a,b)=>(a.nomeEvento||'').localeCompare(b.nomeEvento||'','pt-BR'));
+  else if(state.busca.ordenacao === 'recentes') lista.sort((a,b)=>new Date(b.criadoEm||0)-new Date(a.criadoEm||0));
+  else if(state.busca.ordenacao === 'proximos' && state.busca.localizacao){
+    lista.sort((a,b)=>{
+      const distancia = ev => Number.isFinite(Number(ev.latitude)) && Number.isFinite(Number(ev.longitude)) && ev.latitude !== null && ev.longitude !== null ? distanciaKm(state.busca.localizacao.latitude,state.busca.localizacao.longitude,Number(ev.latitude),Number(ev.longitude)) : Infinity;
+      return distancia(a)-distancia(b);
+    });
+  }
+  
+  const total = lista.length, paginas = Math.max(1,Math.ceil(total/state.busca.porPagina));
+  state.busca.pagina = Math.min(state.busca.pagina,paginas);
+  const inicio = (state.busca.pagina-1)*state.busca.porPagina;
+  const pagina = lista.slice(inicio,inicio+state.busca.porPagina);
+  let html = '';
+  if(aviso) html += `<p class="empty">${escapeHtml(aviso)}</p>`;
+  if(!total) html += '<p class="empty">Nenhum evento encontrado.</p>';
+  else html += pagina.map(ev=>`<div class="event-result" role="button" tabindex="0" aria-label="Inscrever-se em ${escapeHtml(ev.nomeEvento||'evento')}" onclick="selecionarEvento('${escapeHtml(String(ev.id || ev.nomeEvento || ''))}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selecionarEvento('${escapeHtml(String(ev.id || ev.nomeEvento || ''))}')}">${ev.imagem ? `<img src="${escapeHtml(ev.imagem)}" alt="Imagem de ${escapeHtml(ev.nomeEvento||'evento')}" onerror="this.style.display='none'">` : '<div class="event-placeholder">Sem imagem</div>'}<div class="event-info"><div class="n">${escapeHtml(ev.nomeEvento||'Evento sem nome')}</div><div class="d">Início: ${ev.dataInicio ? escapeHtml(new Date(ev.dataInicio).toLocaleString('pt-BR')) : 'Não informado'}</div><div class="d">Local: ${escapeHtml(ev.localizacao||'Não informada')}</div><div class="d" style="margin-top:7px;font-weight:600">Clique para se inscrever →</div></div></div>`).join('');
+  if(total) html += `<div class="pagination"><button ${state.busca.pagina<=1?'disabled':''} onclick="state.busca.pagina--;renderResultadosBusca()">Anterior</button><span style="font-size:11px;color:var(--muted)">Página ${state.busca.pagina} de ${paginas}</span><button ${state.busca.pagina>=paginas?'disabled':''} onclick="state.busca.pagina++;renderResultadosBusca()">Próxima</button></div>`;
+  el.innerHTML = html;
+}
+
+function selecionarEvento(chave){
+  const escolhido = state.busca.eventos.find(ev => String(ev.id || ev.nomeEvento || '') === String(chave));
+  if(!escolhido) return;
+  state.eventoInscricao = escolhido;
+  state.participante = { dias: [], dormida: '', restricoes: [] };
+  go('cadastro');
+}
+
+async function loadPainel(){
+  const el = document.getElementById('painelLista');
+  try{
+    const response = await fetch(`${API_URL}/inscricoes`, {
+      headers: { 'Authorization': `Bearer ${state.authToken}` }
+    });
+    if(!response.ok) throw new Error('Erro ao carregar participantes');
+    const rows = await response.json();
+    
+    if(rows.length === 0){ el.innerHTML = '<p class="empty">Nenhum participante inscrito ainda.</p>'; return; }
+    el.innerHTML = rows.map(r => `<div class="list-item"><div class="n">${escapeHtml(r.nome||'')}</div><div class="d">${escapeHtml(r.email||'')} &middot; ${escapeHtml((r.dias||[]).join(', '))}</div></div>`).join('');
+  } catch(e){
+    el.innerHTML = '<p class="empty">Não foi possível carregar os inscritos do servidor.</p>';
+  }
+}
+
+function escapeHtml(str){ return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function logout(){
+  state.authToken = null;
+  state.history = [];
+  state.screen = 'home';
+  render();
+}
+
+function addMsg(from, text){
+  state.chat.push({ from, text });
+  const box = document.getElementById('chatMsgs');
+  if(!box) return;
+  const div = document.createElement('div');
+  div.className = 'msg ' + false;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  
+  addMsg('user', text);
+  input.value = '';
+  input.focus();
+
+  try {
+    const response = await fetch(`${API_URL}/chat`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.authToken}`
+      },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await response.json();
+    if(response.ok && data.reply) {
+      addMsg('bot', data.reply);
+    }
+  } catch(e) {
+    console.error('Erro no envio da mensagem de chat:', e);
+  }
+}
+
+try{ applyTheme(localStorage.getItem('machforms-theme') || 'light'); }catch(e){ applyTheme('light'); }
+render();
+</script>
+</body>
+</html>
